@@ -61,7 +61,7 @@ class Vote(commands.Cog):
                 except Exception:
                     pass
                 try:
-                    await value.kick(reason=f'{count}票を獲得したため、banされました。')
+                    await value.ban(reason=f'{count}票を獲得したため、banされました。')
                 except Exception:
                     pass
         self.vote_counter = {}
