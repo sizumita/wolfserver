@@ -29,8 +29,8 @@ class Vote(commands.Cog):
         if isinstance(member, discord.User):
             member = self.bot.get_guild(target_guild_id).get_member(member.id)
 
-        if member.id == self.bot.user.id:
-            await ctx.send('私を指定することはできません。')
+        if member.bot:
+            await ctx.send('Botを指定することはできません。')
             return
         changed = False
         before = None
@@ -62,6 +62,19 @@ class Vote(commands.Cog):
                     pass
                 try:
                     await value.ban(reason=f'{count}票を獲得したため、banされました。')
+                except Exception:
+                    pass
+        for member in guild.members:
+            if member.bot:
+                continue
+            if member.id not in self.vote_counter.keys():
+                await self.bot.log(f'{member.mention} ({member}) さんは投票しなかったため、追放されました。')
+                try:
+                    await member.send(f'あなたは投票しなかったため、追放されました。')
+                except Exception:
+                    pass
+                try:
+                    await member.ban(reason=f'投票しなかったため、banされました。', delete_message_days=0)
                 except Exception:
                     pass
         self.vote_counter = {}
