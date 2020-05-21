@@ -17,7 +17,11 @@ class Bot(commands.Bot):
     async def on_ready(self):
         print('Logged on as {0} (ID: {0.id})'.format(self.user))
 
-    async def log(self, message):
+    async def log(self, message, embed=None):
+        if embed:
+            channel = self.get_channel(log_channel_id)
+            await channel.send(embed=embed)
+            return
         channel = self.get_channel(log_channel_id)
         await channel.send(message)
 

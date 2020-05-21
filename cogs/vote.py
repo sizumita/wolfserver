@@ -43,6 +43,15 @@ class Vote(commands.Cog):
             except Exception:
                 await self.bot.log(f"{member.mention} 投票が未完了です。（DMへの送信が失敗したので、こちらに送信されました。）")
 
+    async def ranking(self):
+        embed = discord.Embed(title="投票数ランキング", description="各ユーザーの投票数ランキングを表示します")
+        c = Counter(self.vote_counter.values())
+        i = 1
+        for user, count in c.most_common(10):
+            embed.add_field(name=f"{i}位", value=f"{user.mention}: {count}票")
+            i += 1
+        await self.bot.log(embed=embed)
+
     @commands.command()
     async def vote(self, ctx, member: Union[discord.Member, discord.User]):
         """誰か一人を処刑します。名前かメンション、idで指定してください。"""
@@ -64,12 +73,11 @@ class Vote(commands.Cog):
         await ctx.send(f"ユーザー: {member} を追放先に指定しました。")
         if changed:
             await self.bot.log(f"あるユーザーが 追放先を{before.mention}さんから{member.mention}さんに変更しました！")
+            await self.ranking()
             return
 
         await self.bot.log(f"追放先に{member.mention} さんがあるユーザーによって選ばれました！")
-        c = Counter(self.vote_counter.values())
-        max_member, max_value = c.most_common()[0]
-        await self.bot.log(f"現在、{max_value}票で{max_member.mention}さんが一位です.")
+        await self.ranking()
 
     @tasks.loop(hours=24)
     async def ban_task(self):
