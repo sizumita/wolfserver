@@ -22,13 +22,13 @@ class Vote(commands.Cog):
         next_time = datetime.datetime(year=now.year, month=now.month, day=now.day) + datetime.timedelta(days=1)
         await asyncio.sleep(next_time.timestamp() - now.timestamp())
         self.ban_task.start()
-    
+
     async def setup2(self):
         now = datetime.datetime.now()
         next_time = datetime.datetime(year=now.year, month=now.month, day=now.day, hour=18)
         await asyncio.sleep(next_time.timestamp() - now.timestamp())
         self.notice_task.start()
-    
+
     @tasks.loop(hours=24)
     async def notice_task(self):
         guild = self.bot.get_guild(target_guild_id)
@@ -44,7 +44,7 @@ class Vote(commands.Cog):
         """誰か一人を処刑します。名前かメンション、idで指定してください。"""
         if isinstance(member, discord.User):
             member = self.bot.get_guild(target_guild_id).get_member(member.id)
-        
+
         if member is None:
             await ctx.send("そんな人いないよ！")
 
