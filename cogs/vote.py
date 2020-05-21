@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
-import discord
-import datetime
 import asyncio
-from discord.ext import commands, tasks
+import datetime
 from collections import Counter
 from typing import Union
+
+import discord
+from discord.ext import commands, tasks
+
 target_guild_id = 712581579351785503
 
 
