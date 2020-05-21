@@ -35,11 +35,12 @@ class Vote(commands.Cog):
     async def notice_task(self):
         guild = self.bot.get_guild(target_guild_id)
         for member in guild.members:
-            if member.id not in self.vote_counter.keys():
-                try:
-                    await member.send("投票が未完了です。")
-                except Exception:
-                    await self.bot.log(f"{member.mention} 投票が未完了です。（DMへの送信が失敗したので、こちらに送信されました。）")
+            if member.id in self.vote_counter.keys():
+                continue
+            try:
+                await member.send("投票が未完了です。")
+            except Exception:
+                await self.bot.log(f"{member.mention} 投票が未完了です。（DMへの送信が失敗したので、こちらに送信されました。）")
 
     @commands.command()
     async def vote(self, ctx, member: Union[discord.Member, discord.User]):
@@ -83,18 +84,17 @@ class Vote(commands.Cog):
             except Exception:
                 pass
         for member in guild.members:
-            if member.bot:
+            if member.bot or member.id in self.vote_counter.keys():
                 continue
-            if member.id not in self.vote_counter.keys():
-                await self.bot.log(f"{member.mention} ({member}) さんは投票しなかったため、追放されました。")
-                try:
-                    await member.send("あなたは投票しなかったため、追放されました。")
-                except Exception:
-                    pass
-                try:
-                    await member.ban(reason="投票しなかったため、banされました。", delete_message_days=0)
-                except Exception:
-                    pass
+            await self.bot.log(f"{member.mention} ({member}) さんは投票しなかったため、追放されました。")
+            try:
+                await member.send("あなたは投票しなかったため、追放されました。")
+            except Exception:
+                pass
+            try:
+                await member.ban(reason="投票しなかったため、banされました。", delete_message_days=0)
+            except Exception:
+                pass
         self.vote_counter = {}
 
 
