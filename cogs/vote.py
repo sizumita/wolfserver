@@ -88,11 +88,11 @@ class Vote(commands.Cog):
             if member.id not in self.vote_counter.keys():
                 await self.bot.log(f"{member.mention} ({member}) さんは投票しなかったため、追放されました。")
                 try:
-                    await member.send(f"あなたは投票しなかったため、追放されました。")
+                    await member.send("あなたは投票しなかったため、追放されました。")
                 except Exception:
                     pass
                 try:
-                    await member.ban(reason=f"投票しなかったため、banされました。", delete_message_days=0)
+                    await member.ban(reason="投票しなかったため、banされました。", delete_message_days=0)
                 except Exception:
                     pass
         self.vote_counter = {}
