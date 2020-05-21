@@ -49,7 +49,7 @@ class Vote(commands.Cog):
             await ctx.send("そんな人いないよ！")
 
         if member.bot:
-            await ctx.send('Botを指定することはできません。')
+            await ctx.send("Botを指定することはできません。")
             return
         changed = False
         before = None
@@ -58,15 +58,15 @@ class Vote(commands.Cog):
             before = self.vote_counter[ctx.author.id]
 
         self.vote_counter[ctx.author.id] = member
-        await ctx.send(f'ユーザー: {member} を追放先に指定しました。')
+        await ctx.send(f"ユーザー: {member} を追放先に指定しました。")
         if changed:
-            await self.bot.log(f'あるユーザーが 追放先を{before.mention}さんから{member.mention}さんに変更しました！')
+            await self.bot.log(f"あるユーザーが 追放先を{before.mention}さんから{member.mention}さんに変更しました！")
             return
 
-        await self.bot.log(f'追放先に{member.mention} さんがあるユーザーによって選ばれました！')
+        await self.bot.log(f"追放先に{member.mention} さんがあるユーザーによって選ばれました！")
         c = Counter(self.vote_counter.values())
         max_member, max_value = c.most_common()[0]
-        await self.bot.log(f'現在、{max_value}票で{max_member.mention}さんが一位です.')
+        await self.bot.log(f"現在、{max_value}票で{max_member.mention}さんが一位です.")
 
     @tasks.loop(hours=24)
     async def ban_task(self):
@@ -74,26 +74,26 @@ class Vote(commands.Cog):
         max_value = c.most_common()[0][1]
         for value, count in c.most_common():
             if count == max_value:
-                await self.bot.log(f'{value.mention} ({value}) さんが得票数{count}で追放されました。')
+                await self.bot.log(f"{value.mention} ({value}) さんが得票数{count}で追放されました。")
                 try:
-                    await value.send(f'あなたは{count}票獲得し、追放されました。')
+                    await value.send(f"あなたは{count}票獲得し、追放されました。")
                 except Exception:
                     pass
                 try:
-                    await value.ban(reason=f'{count}票を獲得したため、banされました。')
+                    await value.ban(reason=f"{count}票を獲得したため、banされました。")
                 except Exception:
                     pass
         for member in guild.members:
             if member.bot:
                 continue
             if member.id not in self.vote_counter.keys():
-                await self.bot.log(f'{member.mention} ({member}) さんは投票しなかったため、追放されました。')
+                await self.bot.log(f"{member.mention} ({member}) さんは投票しなかったため、追放されました。")
                 try:
-                    await member.send(f'あなたは投票しなかったため、追放されました。')
+                    await member.send(f"あなたは投票しなかったため、追放されました。")
                 except Exception:
                     pass
                 try:
-                    await member.ban(reason=f'投票しなかったため、banされました。', delete_message_days=0)
+                    await member.ban(reason=f"投票しなかったため、banされました。", delete_message_days=0)
                 except Exception:
                     pass
         self.vote_counter = {}
