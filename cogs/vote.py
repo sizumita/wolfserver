@@ -54,7 +54,6 @@ class Vote(commands.Cog):
             await ctx.send("Botを指定することはできません。")
             return
         changed = False
-        before = None
         if ctx.author.id in self.vote_counter.keys():
             changed = True
             before = self.vote_counter[ctx.author.id]
