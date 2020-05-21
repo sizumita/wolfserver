@@ -50,7 +50,7 @@ class Vote(commands.Cog):
         for user, count in c.most_common(10):
             embed.add_field(name=f"{i}位", value=f"{user.mention}: {count}票")
             i += 1
-        await self.bot.log(embed=embed)
+        await self.bot.log('', embed=embed)
 
     @commands.command()
     async def vote(self, ctx, member: Union[discord.Member, discord.User]):
