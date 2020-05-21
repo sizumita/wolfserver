@@ -83,6 +83,8 @@ class Vote(commands.Cog):
                     await value.ban(reason=f'{count}票を獲得したため、banされました。')
                 except Exception:
                     pass
+
+        guild = self.bot.get_guild(target_guild_id)
         for member in guild.members:
             if member.bot:
                 continue
