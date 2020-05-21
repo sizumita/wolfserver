@@ -72,18 +72,16 @@ class Vote(commands.Cog):
     @tasks.loop(hours=24)
     async def ban_task(self):
         c = Counter(self.vote_counter.values())
-        max_value = c.most_common()[0][1]
         for value, count in c.most_common():
-            if count == max_value:
-                await self.bot.log(f"{value.mention} ({value}) さんが得票数{count}で追放されました。")
-                try:
-                    await value.send(f"あなたは{count}票獲得し、追放されました。")
-                except Exception:
-                    pass
-                try:
-                    await value.ban(reason=f"{count}票を獲得したため、banされました。")
-                except Exception:
-                    pass
+            await self.bot.log(f"{value.mention} ({value}) さんが得票数{count}で追放されました。")
+            try:
+                await value.send(f"あなたは{count}票獲得し、追放されました。")
+            except Exception:
+                pass
+            try:
+                await value.ban(reason=f"{count}票を獲得したため、banされました。")
+            except Exception:
+                pass
         for member in guild.members:
             if member.bot:
                 continue
