@@ -95,7 +95,7 @@ class Vote(commands.Cog):
             if count == max_value:
                 await self.bot.log(f'{value.mention} ({value}) さんが得票数{count}で追放されました。')
                 try:
-                    await value.send(f'あなたは{count}票獲得し、追放されました。')
+                    await value.send(f'あなたは{count}票獲得したため、追放されました。\n追放先のチャットはこちら： https://discord.gg/XdGRaAn')
                 except Exception:
                     pass
                 try:
@@ -112,7 +112,7 @@ class Vote(commands.Cog):
                 continue
             await self.bot.log(f"{member.mention} ({member}) さんは投票しなかったため、追放されました。")
             try:
-                await member.send("あなたは投票しなかったため、追放されました。")
+                await member.send("あなたは投票しなかったため、追放されました。\n追放先のチャットはこちら： https://discord.gg/XdGRaAn")
             except Exception:
                 pass
             try:
