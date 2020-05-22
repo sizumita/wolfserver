@@ -4,7 +4,7 @@ import asyncio
 import datetime
 from collections import Counter
 from typing import Union
-
+import pickle
 import discord
 from discord.ext import commands, tasks
 
@@ -19,6 +19,11 @@ class Vote(commands.Cog):
         self.vote_counter = {}
         self.bot.loop.create_task(self.setup())
         self.bot.loop.create_task(self.setup2())
+        try:
+            with open('vote.pickle', 'rb') as f:
+                self.vote_counter = pickle.load(f)
+        except FileNotFoundError:
+            pass
 
     async def setup(self):
         now = datetime.datetime.now()
@@ -72,15 +77,18 @@ class Vote(commands.Cog):
         self.vote_counter[ctx.author.id] = member
         await ctx.send(f"ユーザー: {member} を追放先に指定しました。")
         if changed:
-            await self.bot.log(f"あるユーザーが 追放先を{before.mention}さんから{member.mention}さんに変更しました！")
+            msg = await self.bot.log("投票")
+            await msg.edit(content=f"あるユーザーが 追放先を{before.mention}さんから{member.mention}さんに変更しました！")
             await self.ranking()
             return
 
-        await self.bot.log(f"追放先に{member.mention} さんがあるユーザーによって選ばれました！")
+        msg = await self.bot.log("投票")
+        await msg.edit(content=f"追放先に{member.mention} さんがあるユーザーによって選ばれました！")
         await self.ranking()
 
     @tasks.loop(hours=24)
     async def ban_task(self):
+        now = datetime.datetime.now()
         c = Counter(self.vote_counter.values())
         max_value = c.most_common()[0][1]
         for value, count in c.most_common():
@@ -91,7 +99,7 @@ class Vote(commands.Cog):
                 except Exception:
                     pass
                 try:
-                    await value.ban(reason=f'{count}票を獲得したため、banされました。')
+                    await value.ban(reason=f'{count}票を獲得したため、banされました。', delete_message_days=0)
                 except Exception:
                     pass
 
@@ -99,6 +107,8 @@ class Vote(commands.Cog):
 
         for member in guild.members:
             if member.bot or member.id in self.vote_counter.keys():
+                continue
+            if now.timestamp() - member.joined_at.timestamp() <= 24 * 60 * 60:
                 continue
             await self.bot.log(f"{member.mention} ({member}) さんは投票しなかったため、追放されました。")
             try:

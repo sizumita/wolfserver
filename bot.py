@@ -1,6 +1,7 @@
 from discord.ext import commands
 import discord
 import config
+import pickle
 target_guild_id = 712581579351785503
 log_channel_id = 712587428426416149
 
@@ -14,16 +15,20 @@ class Bot(commands.Bot):
             except Exception as exc:
                 print('Could not load extension {0} due to {1.__class__.__name__}: {1}'.format(cog, exc))
 
+    async def close(self):
+        with open('vote.pickle', 'wb') as f:
+            pickle.dump(self.get_cog("Vote").vote_counter, f)
+        await super().close()
+
     async def on_ready(self):
         print('Logged on as {0} (ID: {0.id})'.format(self.user))
 
     async def log(self, message, embed=None):
         if embed:
             channel = self.get_channel(log_channel_id)
-            await channel.send(embed=embed)
-            return
+            return await channel.send(embed=embed)
         channel = self.get_channel(log_channel_id)
-        await channel.send(message)
+        return await channel.send(message)
 
 
 bot = Bot()
