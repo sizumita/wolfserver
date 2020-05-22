@@ -52,7 +52,8 @@ class Vote(commands.Cog):
         embed = discord.Embed(title="投票数ランキング", description="各ユーザーの投票数ランキングを表示します")
         c = Counter(self.vote_counter.values())
         i = 1
-        for user, count in c.most_common(10):
+        for user_id, count in c.most_common(10):
+            user = self.bot.get_user(user_id)
             embed.add_field(name=f"{i}位", value=f"{user.mention}: {count}票")
             i += 1
         await self.bot.log('', embed=embed)
@@ -72,9 +73,9 @@ class Vote(commands.Cog):
         changed = False
         if ctx.author.id in self.vote_counter.keys():
             changed = True
-            before = self.vote_counter[ctx.author.id]
+            before = self.bot.get_user(self.vote_counter[ctx.author.id])
 
-        self.vote_counter[ctx.author.id] = member
+        self.vote_counter[ctx.author.id] = member.id
         await ctx.send(f"ユーザー: {member} を追放先に指定しました。")
         if changed:
             msg = await self.bot.log("投票")
@@ -90,8 +91,10 @@ class Vote(commands.Cog):
     async def ban_task(self):
         now = datetime.datetime.now()
         c = Counter(self.vote_counter.values())
+        guild = self.bot.get_guild(target_guild_id)
         max_value = c.most_common()[0][1]
         for value, count in c.most_common():
+            value = guild.get_member(value)
             if count == max_value:
                 await self.bot.log(f'{value.mention} ({value}) さんが得票数{count}で追放されました。')
                 try:
@@ -102,8 +105,6 @@ class Vote(commands.Cog):
                     await value.ban(reason=f'{count}票を獲得したため、banされました。', delete_message_days=0)
                 except Exception:
                     pass
-
-        guild = self.bot.get_guild(target_guild_id)
 
         for member in guild.members:
             if member.bot or member.id in self.vote_counter.keys():
