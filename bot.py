@@ -23,6 +23,8 @@ class Bot(commands.Bot):
             pickle.dump(self.get_cog("Vote").guess_counter, f)
         with open('guess_users.pickle', 'wb') as f:
             pickle.dump(self.get_cog("Vote").guess_users, f)
+        with open('more_vote.pickle', 'wb') as f:
+            pickle.dump(self.get_cog("Vote").more_vote, f)
 
         await super().close()
 
