@@ -48,11 +48,23 @@ class Vote(commands.Cog):
                 self.fake_vote = pickle.load(f)
         except FileNotFoundError:
             pass
+        self.fake_counter = {}
+        try:
+            with open('fake_counter.pickle', 'rb') as f:
+                self.fake_counter = pickle.load(f)
+        except FileNotFoundError:
+            pass
 
     def get_point(self, user_id):
         if user_id in self.guess_counter.keys():
             return self.guess_counter[user_id]
         self.guess_counter[user_id] = 10
+        return self.guess_counter[user_id]
+
+    def get_fake_count(self, user_id):
+        if user_id in self.fake_counter.keys():
+            return self.fake_counter[user_id]
+        self.guess_counter[user_id] = 0
         return self.guess_counter[user_id]
 
     async def setup(self):
@@ -123,16 +135,20 @@ class Vote(commands.Cog):
         if member is None:
             await ctx.send("そんな人いないよ！")
             return
-        if self.get_point(ctx.author.id) < 1:
-            await ctx.send(f'ポイントが足りません。({self.get_point(ctx.author.id)} < 1)')
-            return
-        self.guess_counter[ctx.author.id] -= 1
+        if self.get_fake_count(ctx.author.id) != 4:
+            self.fake_counter[ctx.author.id] += 1
+        else:
+            if self.get_point(ctx.author.id) < 1:
+                await ctx.send(f'ポイントが足りません。({self.get_point(ctx.author.id)} < 1)')
+                return
+            self.guess_counter[ctx.author.id] -= 1
         if member.id not in self.fake_vote.keys():
             self.fake_vote[member.id] = 0
         self.fake_vote[member.id] += 1
         await ctx.send('完了')
         msg = await self.bot.log("投票")
         await msg.edit(content=f"追放先に{member.mention} さんがあるユーザーによって選ばれました！")
+        await self.ranking()
 
     @commands.command()
     async def more(self, ctx, member: Union[discord.Member, discord.User]):
@@ -158,6 +174,7 @@ class Vote(commands.Cog):
         await ctx.send(f"ユーザー: {member} を追加の追放先に指定しました。")
         msg = await self.bot.log("投票")
         await msg.edit(content=f"追放先に{member.mention} さんがあるユーザーによって選ばれました！")
+        await self.ranking()
 
     @commands.command()
     async def vote(self, ctx, member: Union[discord.Member, discord.User]):
@@ -258,6 +275,7 @@ class Vote(commands.Cog):
                 await self.bot.log(f'{member.mention} さん、おめでとうございます。見事予想が当たりました。')
                 self.guess_counter[guess_user_id] += 1
         self.guess_users = {}
+        self.fake_counter = {}
 
 
 def setup(bot):
