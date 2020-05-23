@@ -211,10 +211,7 @@ class Vote(commands.Cog):
 
     @commands.command()
     async def point(self, ctx):
-        if ctx.author.id not in self.guess_counter.keys():
-            await ctx.send('0ポイント')
-            return
-        await ctx.send(f'{self.guess_counter[ctx.author.id]}ポイント')
+        await ctx.send(f'{self.get_point(ctx.author.id)}ポイント')
 
     @tasks.loop(hours=24)
     async def ban_task(self):
