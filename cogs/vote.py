@@ -65,7 +65,7 @@ class Vote(commands.Cog):
         if user_id in self.fake_counter.keys():
             return self.fake_counter[user_id]
         self.fake_counter[user_id] = 0
-        return self.guess_counter[user_id]
+        return self.fake_counter[user_id]
 
     async def setup(self):
         now = datetime.datetime.now()
