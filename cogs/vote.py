@@ -102,11 +102,6 @@ class Vote(commands.Cog):
     @commands.command()
     async def real(self, ctx):
         """本当"""
-        if isinstance(member, discord.User):
-            member = self.bot.get_guild(target_guild_id).get_member(member.id)
-        if member is None:
-            await ctx.send("そんな人いないよ！")
-            return
         if self.get_point(ctx.author.id) < 2:
             await ctx.send(f'ポイントが足りません。({self.get_point(ctx.author.id)} < 2)')
             return
