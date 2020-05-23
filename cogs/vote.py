@@ -42,11 +42,18 @@ class Vote(commands.Cog):
                 self.more_vote = pickle.load(f)
         except FileNotFoundError:
             pass
+        self.fake_vote = {}
+        try:
+            with open('fake.pickle', 'rb') as f:
+                self.fake_vote = pickle.load(f)
+        except FileNotFoundError:
+            pass
 
     def get_point(self, user_id):
         if user_id in self.guess_counter.keys():
             return self.guess_counter[user_id]
-        return 0
+        self.guess_counter[user_id] = 10
+        return self.guess_counter[user_id]
 
     async def setup(self):
         now = datetime.datetime.now()
@@ -71,8 +78,14 @@ class Vote(commands.Cog):
             except Exception:
                 await self.bot.log(f"{member.mention} 投票が未完了です。（DMへの送信が失敗したので、こちらに送信されました。）")
 
-    def get_vote_vounter(self):
+    def get_vote_vounter(self, include_fake=True):
         all_ = list(self.vote_counter.values()) + list(self.more_vote.values())
+        if include_fake:
+            _ = []
+            for key, value in self.fake_vote.items():
+                for x in range(value):
+                    _.append(key)
+            all_ += _
         c = Counter(all_)
         return c
 
@@ -87,6 +100,46 @@ class Vote(commands.Cog):
         await self.bot.log('', embed=embed)
 
     @commands.command()
+    async def real(self, ctx, member: Union[discord.Member, discord.User]):
+        """本当"""
+        if isinstance(member, discord.User):
+            member = self.bot.get_guild(target_guild_id).get_member(member.id)
+        if member is None:
+            await ctx.send("そんな人いないよ！")
+            return
+        if self.get_point(ctx.author.id) < 2:
+            await ctx.send(f'ポイントが足りません。({self.get_point(ctx.author.id)} < 2)')
+            return
+        self.guess_counter[ctx.author.id] -= 2
+        embed = discord.Embed(title="投票数ランキング", description="各ユーザーの投票数ランキングを表示します")
+        c = self.get_vote_vounter(False)
+        i = 1
+        for user_id, count in c.most_common(10):
+            user = self.bot.get_user(user_id)
+            embed.add_field(name=f"{i}位", value=f"{user.mention}: {count}票")
+            i += 1
+        await ctx.author.send(embed=embed)
+
+    @commands.command()
+    async def fake(self, ctx, member: Union[discord.Member, discord.User]):
+        """嘘投票"""
+        if isinstance(member, discord.User):
+            member = self.bot.get_guild(target_guild_id).get_member(member.id)
+        if member is None:
+            await ctx.send("そんな人いないよ！")
+            return
+        if self.get_point(ctx.author.id) < 1:
+            await ctx.send(f'ポイントが足りません。({self.get_point(ctx.author.id)} < 1)')
+            return
+        self.guess_counter[ctx.author.id] -= 1
+        if member.id not in self.fake_vote.keys():
+            self.fake_vote[member.id] = 0
+        self.fake_vote[member.id] += 1
+        await ctx.send('完了')
+        msg = await self.bot.log("投票")
+        await msg.edit(content=f"追放先に{member.mention} さんがあるユーザーによって選ばれました！")
+
+    @commands.command()
     async def more(self, ctx, member: Union[discord.Member, discord.User]):
         """追加の投票"""
         if isinstance(member, discord.User):
@@ -94,7 +147,7 @@ class Vote(commands.Cog):
 
         if member is None:
             await ctx.send("そんな人いないよ！")
-
+            return
         if self.get_point(ctx.author.id) < 10:
             await ctx.send(f'ポイントが足りません。({self.get_point(ctx.author.id)} < 10)')
             return
@@ -102,14 +155,14 @@ class Vote(commands.Cog):
             before = self.bot.get_user(self.more_vote[ctx.author.id])
             self.more_vote[ctx.author.id] = member.id
             await ctx.send(f"ユーザー: {member} を追加の追放先に指定しました。")
-            msg = await self.bot.log('追加投票')
-            await msg.edit(content=f'あるユーザーが追加投票先のユーザーを{before.mention}さんから{member.mention}さんに変更しました！')
+            msg = await self.bot.log('投票')
+            await msg.edit(content=f"あるユーザーが 追放先を{before.mention}さんから{member.mention}さんに変更しました！")
             return
         self.guess_counter[ctx.author.id] -= 10
         self.more_vote[ctx.author.id] = member.id
         await ctx.send(f"ユーザー: {member} を追加の追放先に指定しました。")
-        msg = await self.bot.log("追加投票")
-        await msg.edit(content=f'あるユーザーが{member.mention}さんを追加投票先に指定しました！')
+        msg = await self.bot.log("投票")
+        await msg.edit(content=f"追放先に{member.mention} さんがあるユーザーによって選ばれました！")
 
     @commands.command()
     async def vote(self, ctx, member: Union[discord.Member, discord.User]):
@@ -171,7 +224,7 @@ class Vote(commands.Cog):
     @tasks.loop(hours=24)
     async def ban_task(self):
         now = datetime.datetime.now()
-        c = self.get_vote_vounter()
+        c = self.get_vote_vounter(False)
         guild = self.bot.get_guild(target_guild_id)
         max_value = c.most_common()[0][1]
         banned_users_id = []
