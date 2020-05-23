@@ -100,7 +100,7 @@ class Vote(commands.Cog):
         await self.bot.log('', embed=embed)
 
     @commands.command()
-    async def real(self, ctx, member: Union[discord.Member, discord.User]):
+    async def real(self, ctx):
         """本当"""
         if isinstance(member, discord.User):
             member = self.bot.get_guild(target_guild_id).get_member(member.id)
