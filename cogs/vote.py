@@ -105,7 +105,7 @@ class Vote(commands.Cog):
             member = self.bot.get_guild(target_guild_id).get_member(member.id)
         exists = None
         if ctx.author.id in self.guess_users.keys():
-            exists = self.guess_users[exists]
+            exists = self.guess_users[ctx.author.id]
         self.guess_users[ctx.author.id] = member.id
         if ctx.author.id not in self.guess_counter.keys():
             self.guess_counter[ctx.author.id] = 0
@@ -116,7 +116,7 @@ class Vote(commands.Cog):
             before_member = self.bot.get_guild(target_guild_id).get_member(exists)
             await msg.edit(content=f'あるユーザーが追放されるユーザーの予想を{before_member.mention}さんから{member.mention}さんに変更しました。')
             return
-        await msg.edit(content=f'あるユーザーが{member.mention}さんが追放されるユーザーだと予想されました。')
+        await msg.edit(content=f'あるユーザーが{member.mention}さんが追放されるユーザーだと予想しました。')
 
     @commands.command()
     async def point(self, ctx):

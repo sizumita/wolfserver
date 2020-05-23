@@ -4,6 +4,7 @@ import config
 import pickle
 target_guild_id = 712581579351785503
 log_channel_id = 712587428426416149
+notice_channel_id = 713729437371465820
 
 
 class Bot(commands.Bot):
@@ -33,6 +34,12 @@ class Bot(commands.Bot):
             channel = self.get_channel(log_channel_id)
             return await channel.send(embed=embed)
         channel = self.get_channel(log_channel_id)
+        return await channel.send(message)
+
+    async def notice(self, message, embed=None):
+        channel = self.get_channel(notice_channel_id)
+        if embed:
+            return await channel.send(embed=embed)
         return await channel.send(message)
 
 
