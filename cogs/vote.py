@@ -24,6 +24,18 @@ class Vote(commands.Cog):
                 self.vote_counter = pickle.load(f)
         except FileNotFoundError:
             pass
+        self.guess_counter = {}
+        self.guess_users = {}
+        try:
+            with open('guess.pickle', 'rb') as f:
+                self.guess_counter = pickle.load(f)
+        except FileNotFoundError:
+            pass
+        try:
+            with open('guess_users.pickle', 'rb') as f:
+                self.guess_users = pickle.load(f)
+        except FileNotFoundError:
+            pass
 
     async def setup(self):
         now = datetime.datetime.now()
@@ -87,13 +99,41 @@ class Vote(commands.Cog):
         await msg.edit(content=f"追放先に{member.mention} さんがあるユーザーによって選ばれました！")
         await self.ranking()
 
+    @commands.command()
+    async def guess(self, ctx, member: Union[discord.Member, discord.User]):
+        if isinstance(member, discord.User):
+            member = self.bot.get_guild(target_guild_id).get_member(member.id)
+        exists = None
+        if ctx.author.id in self.guess_users.keys():
+            exists = self.guess_users[exists]
+        self.guess_users[ctx.author.id] = member.id
+        if ctx.author.id not in self.guess_counter.keys():
+            self.guess_counter[ctx.author.id] = 0
+        msg = await ctx.send('結果')
+        await msg.edit(content=f'{member.mention}さんを追放されるユーザーだと予想しました！')
+        msg = await self.bot.log('予想')
+        if exists is not None:
+            before_member = self.bot.get_guild(target_guild_id).get_member(exists)
+            await msg.edit(content=f'あるユーザーが追放されるユーザーの予想を{before_member.mention}さんから{member.mention}さんに変更しました。')
+            return
+        await msg.edit(content=f'あるユーザーが{member.mention}さんが追放されるユーザーだと予想されました。')
+
+    @commands.command()
+    async def point(self, ctx):
+        if ctx.author.id not in self.guess_counter.keys():
+            await ctx.send('0ポイント')
+            return
+        await ctx.send(f'{self.guess_counter[ctx.author.id]}ポイント')
+
     @tasks.loop(hours=24)
     async def ban_task(self):
         now = datetime.datetime.now()
         c = Counter(self.vote_counter.values())
         guild = self.bot.get_guild(target_guild_id)
         max_value = c.most_common()[0][1]
+        banned_users_id = []
         for value, count in c.most_common():
+            banned_users_id.append(value)
             value = guild.get_member(value)
             if count == max_value:
                 await self.bot.log(f'{value.mention} ({value}) さんが得票数{count}で追放されました。')
@@ -121,6 +161,14 @@ class Vote(commands.Cog):
             except Exception:
                 pass
         self.vote_counter = {}
+        for guess_user_id, guessed_user_id in self.guess_users.items():
+            if guess_user_id in banned_users_id:
+                continue
+            if guessed_user_id in banned_users_id:
+                member = guild.get_member(guess_user_id)
+                await self.bot.log(f'{member.mention} さん、おめでとうございます。見事予想が当たりました。')
+                self.guess_counter[guess_user_id] += 1
+        self.guess_users = {}
 
 
 def setup(bot):

@@ -18,6 +18,11 @@ class Bot(commands.Bot):
     async def close(self):
         with open('vote.pickle', 'wb') as f:
             pickle.dump(self.get_cog("Vote").vote_counter, f)
+        with open('guess.pickle', 'wb') as f:
+            pickle.dump(self.get_cog("Vote").guess_counter, f)
+        with open('guess_users.pickle', 'wb') as f:
+            pickle.dump(self.get_cog("Vote").guess_users, f)
+
         await super().close()
 
     async def on_ready(self):
