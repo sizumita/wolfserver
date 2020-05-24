@@ -135,7 +135,7 @@ class Vote(commands.Cog):
         if member is None:
             await ctx.send("そんな人いないよ！")
             return
-        if self.get_fake_count(ctx.author.id) != 4:
+        if self.get_fake_count(ctx.author.id) != 1:
             self.fake_counter[ctx.author.id] += 1
         else:
             if self.get_point(ctx.author.id) < 1:
