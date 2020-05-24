@@ -61,6 +61,10 @@ class Vote(commands.Cog):
         self.guess_counter[user_id] = 10
         return self.guess_counter[user_id]
 
+    def change_point(self, user_id, p):
+        _ = self.get_point(user_id)
+        self.guess_counter[user_id] += p
+
     def get_fake_count(self, user_id):
         if user_id in self.fake_counter.keys():
             return self.fake_counter[user_id]
@@ -117,7 +121,7 @@ class Vote(commands.Cog):
         if self.get_point(ctx.author.id) < 2:
             await ctx.send(f'ポイントが足りません。({self.get_point(ctx.author.id)} < 2)')
             return
-        self.guess_counter[ctx.author.id] -= 2
+        self.change_point(ctx.author.id, -2)
         embed = discord.Embed(title="投票数ランキング", description="各ユーザーの投票数ランキングを表示します")
         c = self.get_vote_vounter(False)
         i = 1
@@ -141,7 +145,7 @@ class Vote(commands.Cog):
             if self.get_point(ctx.author.id) < 1:
                 await ctx.send(f'ポイントが足りません。({self.get_point(ctx.author.id)} < 1)')
                 return
-            self.guess_counter[ctx.author.id] -= 1
+            self.change_point(ctx.author.id, -1)
         if member.id not in self.fake_vote.keys():
             self.fake_vote[member.id] = 0
         self.fake_vote[member.id] += 1
@@ -169,7 +173,7 @@ class Vote(commands.Cog):
             msg = await self.bot.log('投票')
             await msg.edit(content=f"あるユーザーが 追放先を{before.mention}さんから{member.mention}さんに変更しました！")
             return
-        self.guess_counter[ctx.author.id] -= 10
+        self.change_point(ctx.author.id, -10)
         self.more_vote[ctx.author.id] = member.id
         await ctx.send(f"ユーザー: {member} を追加の追放先に指定しました。")
         msg = await self.bot.log("投票")
@@ -219,8 +223,7 @@ class Vote(commands.Cog):
             await ctx.send('もうあなたは予想しています！')
             return
         self.guess_users[ctx.author.id] = member.id
-        if ctx.author.id not in self.guess_counter.keys():
-            self.guess_counter[ctx.author.id] = 10
+        _ = self.get_point(ctx.author.id)
         msg = await ctx.send('結果')
         await msg.edit(content=f'{member.mention}さんを追放されるユーザーだと予想しました！')
         msg = await self.bot.log('予想')
@@ -274,7 +277,7 @@ class Vote(commands.Cog):
                 if guessed_user_id in banned_users_id:
                     member = guild.get_member(guess_user_id)
                     await self.bot.log(f'{member.mention} さん、おめでとうございます。見事予想が当たりました。')
-                    self.guess_counter[guess_user_id] += 1
+                    self.change_point(guess_user_id, 1)
             except Exception:
                 pass
         self.guess_users = {}
