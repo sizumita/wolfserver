@@ -238,10 +238,10 @@ class Vote(commands.Cog):
         max_value = c.most_common()[0][1]
         banned_users_id = []
         for value, count in c.most_common():
-            banned_users_id.append(value)
             value = guild.get_member(value)
             if count == max_value:
                 await self.bot.log(f'{value.mention} ({value}) さんが得票数{count}で追放されました。')
+                banned_users_id.append(value)
                 try:
                     await value.send(f'あなたは{count}票獲得したため、追放されました。\n追放先のチャットはこちら： https://discord.gg/XdGRaAn')
                 except Exception:
@@ -268,12 +268,15 @@ class Vote(commands.Cog):
         self.vote_counter = {}
         self.more_vote = {}
         for guess_user_id, guessed_user_id in self.guess_users.items():
-            if guess_user_id in banned_users_id:
-                continue
-            if guessed_user_id in banned_users_id:
-                member = guild.get_member(guess_user_id)
-                await self.bot.log(f'{member.mention} さん、おめでとうございます。見事予想が当たりました。')
-                self.guess_counter[guess_user_id] += 1
+            try:
+                if guess_user_id in banned_users_id:
+                    continue
+                if guessed_user_id in banned_users_id:
+                    member = guild.get_member(guess_user_id)
+                    await self.bot.log(f'{member.mention} さん、おめでとうございます。見事予想が当たりました。')
+                    self.guess_counter[guess_user_id] += 1
+            except Exception:
+                pass
         self.guess_users = {}
         self.fake_counter = {}
         self.fake_vote = {}
