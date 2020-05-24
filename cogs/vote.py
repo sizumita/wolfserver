@@ -123,6 +123,11 @@ class Vote(commands.Cog):
         embed = self.make_ranking_embed()
         await self.bot.log('', embed=embed)
 
+
+    @commands.command()
+    async def ranking(self, ctx):
+        await ctx.channel.send('', embed=self.make_ranking_embed())
+
     @commands.command()
     async def real(self, ctx):
         """本当"""
