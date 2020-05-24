@@ -54,6 +54,9 @@ class Vote(commands.Cog):
                 self.fake_counter = pickle.load(f)
         except FileNotFoundError:
             pass
+        for x in self.guess_counter.keys():
+            if self.guess_counter[x] == 0:
+                self.guess_counter[x] = 10
 
     def get_point(self, user_id):
         if user_id in self.guess_counter.keys():
