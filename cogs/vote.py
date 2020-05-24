@@ -108,7 +108,7 @@ class Vote(commands.Cog):
         c = Counter(all_)
         return c
 
-    async def ranking(self):
+    def make_ranking_embed(self):
         embed = discord.Embed(title="投票数ランキング", description="各ユーザーの投票数ランキングを表示します")
         c = self.get_vote_vounter()
         i = 1
@@ -116,6 +116,11 @@ class Vote(commands.Cog):
             user = self.bot.get_user(user_id)
             embed.add_field(name=f"{i}位", value=f"{user.mention}: {count}票")
             i += 1
+
+        return embed
+
+    async def ranking(self):
+        embed = self.make_ranking_embed()
         await self.bot.log('', embed=embed)
 
     @commands.command()
