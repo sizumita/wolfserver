@@ -119,7 +119,7 @@ class Vote(commands.Cog):
 
         return embed
 
-    async def ranking(self):
+    async def send_ranking_to_log(self):
         embed = self.make_ranking_embed()
         await self.bot.log('', embed=embed)
 
@@ -160,7 +160,7 @@ class Vote(commands.Cog):
         await ctx.send('完了')
         msg = await self.bot.log("投票")
         await msg.edit(content=f"追放先に{member.mention} さんがあるユーザーによって選ばれました！")
-        await self.ranking()
+        await self.send_ranking_to_log()
 
     @commands.command()
     async def more(self, ctx, member: Union[discord.Member, discord.User]):
@@ -186,7 +186,7 @@ class Vote(commands.Cog):
         await ctx.send(f"ユーザー: {member} を追加の追放先に指定しました。")
         msg = await self.bot.log("投票")
         await msg.edit(content=f"追放先に{member.mention} さんがあるユーザーによって選ばれました！")
-        await self.ranking()
+        await self.send_ranking_to_log()
 
     @commands.command()
     async def vote(self, ctx, member: Union[discord.Member, discord.User]):
@@ -210,12 +210,12 @@ class Vote(commands.Cog):
         if changed:
             msg = await self.bot.log("投票")
             await msg.edit(content=f"あるユーザーが 追放先を{before.mention}さんから{member.mention}さんに変更しました！")
-            await self.ranking()
+            await self.send_ranking_to_log()
             return
 
         msg = await self.bot.log("投票")
         await msg.edit(content=f"追放先に{member.mention} さんがあるユーザーによって選ばれました！")
-        await self.ranking()
+        await self.send_ranking_to_log()
 
     @commands.command()
     async def guess(self, ctx, member: Union[discord.Member, discord.User]):
