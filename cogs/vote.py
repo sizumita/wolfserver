@@ -220,7 +220,7 @@ class Vote(commands.Cog):
             return
         self.guess_users[ctx.author.id] = member.id
         if ctx.author.id not in self.guess_counter.keys():
-            self.guess_counter[ctx.author.id] = 0
+            self.guess_counter[ctx.author.id] = 10
         msg = await ctx.send('結果')
         await msg.edit(content=f'{member.mention}さんを追放されるユーザーだと予想しました！')
         msg = await self.bot.log('予想')
@@ -276,6 +276,7 @@ class Vote(commands.Cog):
                 self.guess_counter[guess_user_id] += 1
         self.guess_users = {}
         self.fake_counter = {}
+        self.fake_vote = {}
 
 
 def setup(bot):
