@@ -6,7 +6,6 @@ target_guild_id = 712581579351785503
 log_channel_id = 712587428426416149
 notice_channel_id = 713729437371465820
 msg = """
-
 """
 
 
@@ -37,7 +36,6 @@ class Bot(commands.Bot):
 
     async def on_ready(self):
         print('Logged on as {0} (ID: {0.id})'.format(self.user))
-        # await self.notice(msg)
 
     async def log(self, message, embed=None):
         if embed:

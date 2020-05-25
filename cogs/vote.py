@@ -95,9 +95,14 @@ class Vote(commands.Cog):
             try:
                 await member.send("投票が未完了です。")
             except Exception:
-                await self.bot.log(f"{member.mention} 投票が未完了です。（DMへの送信が失敗したので、こちらに送信されました。）")
+                await self.bot.log(f"{member if member is None else member.mention} 投票が未完了です。（DMへの送信が失敗したので、こちらに送信されました。）")
 
     def get_vote_vounter(self, include_fake=True):
+        for x in list(self.vote_counter):
+            guild = self.bot.get_guild(target_guild_id)
+            member = guild.get_member(x)
+            if member is None:
+                del self.vote_counter[x]
         all_ = list(self.vote_counter.values()) + list(self.more_vote.values())
         if include_fake:
             _ = []
@@ -108,21 +113,23 @@ class Vote(commands.Cog):
         c = Counter(all_)
         return c
 
-    def make_ranking_embed(self):
+    def make_ranking_embed(self, include_fake=True):
         embed = discord.Embed(title="投票数ランキング", description="各ユーザーの投票数ランキングを表示します")
-        c = self.get_vote_vounter()
+        c = self.get_vote_vounter(include_fake)
         i = 1
         for user_id, count in c.most_common(10):
             user = self.bot.get_user(user_id)
-            embed.add_field(name=f"{i}位", value=f"{user.mention}: {count}票")
+            embed.add_field(name=f"{i}位", value=f"{user if user is None else user.mention}: {count}票")
             i += 1
 
         return embed
 
-    async def send_ranking_to_log(self):
-        embed = self.make_ranking_embed()
+    async def send_ranking_to_log(self, include_fake=True):
+        n = datetime.datetime.now()
+        if n.hour == 23:
+            return
+        embed = self.make_ranking_embed(include_fake)
         await self.bot.log('', embed=embed)
-
 
     @commands.command()
     async def ranking(self, ctx):
@@ -135,14 +142,7 @@ class Vote(commands.Cog):
             await ctx.send(f'ポイントが足りません。({self.get_point(ctx.author.id)} < 2)')
             return
         self.change_point(ctx.author.id, -2)
-        embed = discord.Embed(title="投票数ランキング", description="各ユーザーの投票数ランキングを表示します")
-        c = self.get_vote_vounter(False)
-        i = 1
-        for user_id, count in c.most_common(10):
-            user = self.bot.get_user(user_id)
-            embed.add_field(name=f"{i}位", value=f"{user.mention}: {count}票")
-            i += 1
-        await ctx.author.send(embed=embed)
+        await ctx.author.send(embed=self.make_ranking_embed(False))
 
     @commands.command()
     async def fake(self, ctx, member: Union[discord.Member, discord.User]):
@@ -214,7 +214,7 @@ class Vote(commands.Cog):
         await ctx.send(f"ユーザー: {member} を追放先に指定しました。")
         if changed:
             msg = await self.bot.log("投票")
-            await msg.edit(content=f"あるユーザーが 追放先を{before.mention}さんから{member.mention}さんに変更しました！")
+            await msg.edit(content=f"あるユーザーが 追放先を{before if before is None else before.mention}さんから{member if member is None else member.mention}さんに変更しました！")
             await self.send_ranking_to_log()
             return
 
@@ -249,6 +249,7 @@ class Vote(commands.Cog):
     @tasks.loop(hours=24)
     async def ban_task(self):
         now = datetime.datetime.now()
+        await self.bot.log('最終結果', embed=self.make_ranking_embed(False))
         c = self.get_vote_vounter(False)
         guild = self.bot.get_guild(target_guild_id)
         max_value = c.most_common()[0][1]
