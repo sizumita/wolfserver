@@ -108,7 +108,7 @@ class Vote(commands.Cog):
         c = Counter(all_)
         return c
 
-    async def ranking(self):
+    def make_ranking_embed(self):
         embed = discord.Embed(title="投票数ランキング", description="各ユーザーの投票数ランキングを表示します")
         c = self.get_vote_vounter()
         i = 1
@@ -116,7 +116,17 @@ class Vote(commands.Cog):
             user = self.bot.get_user(user_id)
             embed.add_field(name=f"{i}位", value=f"{user.mention}: {count}票")
             i += 1
+
+        return embed
+
+    async def send_ranking_to_log(self):
+        embed = self.make_ranking_embed()
         await self.bot.log('', embed=embed)
+
+
+    @commands.command()
+    async def ranking(self, ctx):
+        await ctx.channel.send('', embed=self.make_ranking_embed())
 
     @commands.command()
     async def real(self, ctx):
@@ -155,7 +165,7 @@ class Vote(commands.Cog):
         await ctx.send('完了')
         msg = await self.bot.log("投票")
         await msg.edit(content=f"追放先に{member.mention} さんがあるユーザーによって選ばれました！")
-        await self.ranking()
+        await self.send_ranking_to_log()
 
     @commands.command()
     async def more(self, ctx, member: Union[discord.Member, discord.User]):
@@ -181,7 +191,7 @@ class Vote(commands.Cog):
         await ctx.send(f"ユーザー: {member} を追加の追放先に指定しました。")
         msg = await self.bot.log("投票")
         await msg.edit(content=f"追放先に{member.mention} さんがあるユーザーによって選ばれました！")
-        await self.ranking()
+        await self.send_ranking_to_log()
 
     @commands.command()
     async def vote(self, ctx, member: Union[discord.Member, discord.User]):
@@ -205,12 +215,12 @@ class Vote(commands.Cog):
         if changed:
             msg = await self.bot.log("投票")
             await msg.edit(content=f"あるユーザーが 追放先を{before.mention}さんから{member.mention}さんに変更しました！")
-            await self.ranking()
+            await self.send_ranking_to_log()
             return
 
         msg = await self.bot.log("投票")
         await msg.edit(content=f"追放先に{member.mention} さんがあるユーザーによって選ばれました！")
-        await self.ranking()
+        await self.send_ranking_to_log()
 
     @commands.command()
     async def guess(self, ctx, member: Union[discord.Member, discord.User]):
