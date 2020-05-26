@@ -50,6 +50,10 @@ class Bot(commands.Bot):
             return await channel.send(embed=embed)
         return await channel.send(message)
 
+    async def on_member_remove(self, member):
+        await self.log(f'{member.mention} さんはサーバーから退出したため追放されました。')
+        await member.ban(reason='サーバーから退出したため', delete_message_days=0)
+
 
 bot = Bot()
 

@@ -254,8 +254,10 @@ class Vote(commands.Cog):
         guild = self.bot.get_guild(target_guild_id)
         max_value = c.most_common()[0][1]
         banned_users_id = []
-        for value, count in c.most_common():
-            value = guild.get_member(value)
+        for user_id, count in c.most_common():
+            value = guild.get_member(user_id)
+            if value is None:
+                continue
             if count == max_value:
                 await self.bot.log(f'{value.mention} ({value}) さんが得票数{count}で追放されました。')
                 banned_users_id.append(value)
