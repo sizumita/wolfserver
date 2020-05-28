@@ -36,8 +36,8 @@ class Bot(commands.Bot):
 
     async def on_ready(self):
         print('Logged on as {0} (ID: {0.id})'.format(self.user))
-        await self.notice('@everyone 付与されていないバグを消去しました。また、5ポイント補填しました。また、10ポイント消費するとななななんとBANをを回避できます ！')
-
+        await self.notice('５とか言いながら４しか付与してなかったので１付与しました')
+        
     async def log(self, message, embed=None):
         if embed:
             channel = self.get_channel(log_channel_id)
