@@ -57,6 +57,8 @@ class Vote(commands.Cog):
         for x in self.guess_counter.keys():
             if self.guess_counter[x] == 0:
                 self.guess_counter[x] = 10
+        for x in list(self.guess_counter):
+            self.change_point(x, 10)
 
     def get_point(self, user_id):
         if user_id in self.guess_counter.keys():
@@ -259,6 +261,10 @@ class Vote(commands.Cog):
             if value is None:
                 continue
             if count == max_value:
+                if self.get_point(user_id) >= 10:
+                    await self.bot.log(f'{value.mention}さんは追放されるはずでしたが、10ポイント支払い生き残りました。')
+                    self.change_point(user_id, -10)
+                    continue
                 await self.bot.log(f'{value.mention} ({value}) さんが得票数{count}で追放されました。')
                 banned_users_id.append(value)
                 try:
@@ -288,7 +294,7 @@ class Vote(commands.Cog):
         self.more_vote = {}
         for guess_user_id, guessed_user_id in self.guess_users.items():
             try:
-                if guess_user_id in banned_users_id:
+                if guess_user_id not in banned_users_id:
                     continue
                 if guessed_user_id in banned_users_id:
                     member = guild.get_member(guess_user_id)
