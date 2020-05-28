@@ -58,7 +58,7 @@ class Vote(commands.Cog):
             if self.guess_counter[x] == 0:
                 self.guess_counter[x] = 10
         for x in list(self.guess_counter):
-            self.change_point(x, 10)
+            self.change_point(x, 4)
 
     def get_point(self, user_id):
         if user_id in self.guess_counter.keys():
